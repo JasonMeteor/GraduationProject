@@ -12,6 +12,7 @@ public class MainActivity extends AppCompatActivity {
     private Button btnTranslate;
     private Button btnTraining;
     private Button btnSetting;
+    private Button btnGoToAPITest;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
         btnTranslate = findViewById(R.id.btn_translate);
         btnTraining = findViewById(R.id.btn_training);
         btnSetting = findViewById(R.id.btn_setting);
+        btnGoToAPITest = findViewById(R.id.btn_gotoapitest);
 
         View.OnClickListener switchLayoutListener = new View.OnClickListener() {
 
@@ -37,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
                 else if(id == R.id.btn_setting){
                     intent.setClass(MainActivity.this, Setting.class);
                 }
+                else if(id == R.id.btn_gotoapitest){
+                    intent.setClass(MainActivity.this, APITestActivity.class);
+                }
                 startActivity(intent);
             }
         };
@@ -44,5 +49,6 @@ public class MainActivity extends AppCompatActivity {
         btnTranslate.setOnClickListener(switchLayoutListener);
         btnTraining.setOnClickListener(switchLayoutListener);
         btnSetting.setOnClickListener(switchLayoutListener);
+        btnGoToAPITest.setOnClickListener(switchLayoutListener);
     }
 }

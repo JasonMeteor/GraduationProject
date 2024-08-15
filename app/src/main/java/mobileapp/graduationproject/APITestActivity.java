@@ -2,6 +2,7 @@ package mobileapp.graduationproject;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -60,6 +61,7 @@ public class APITestActivity extends AppCompatActivity {
                     call.enqueue(new Callback<MinusResponse>() {
                         @Override
                         public void onResponse(Call<MinusResponse> call, Response<MinusResponse> response) {
+                            Log.d("API", "package sent");
                             if(response.isSuccessful()){
                                 MinusResponse minusResponse = response.body();
                                 if(minusResponse != null){
@@ -71,11 +73,15 @@ public class APITestActivity extends AppCompatActivity {
                                     tvResult.setText("結果: fail to get result.");
                                 }
                             }
+                            else{
+                                Log.d("API", "fail to get response");
+                            }
                         }
 
                         @Override
                         public void onFailure(Call<MinusResponse> call, Throwable t) {
                             Toast.makeText(APITestActivity.this, "ERROR: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                            Log.e("API", t.getMessage());
                         }
                     });
                 }

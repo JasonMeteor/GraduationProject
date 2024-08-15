@@ -56,6 +56,7 @@
         app:layout_constraintTop_toBottomOf="@+id/tv_lastUpdate" />
 
     <LinearLayout
+        android:id="@+id/linearLayout3"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
@@ -77,5 +78,15 @@
             android:layout_weight="1"
             android:text="設定" />
     </LinearLayout>
+
+    <Button
+        android:id="@+id/btn_gotoapitest"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="68dp"
+        android:layout_marginTop="35dp"
+        android:text="減法器API測試"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

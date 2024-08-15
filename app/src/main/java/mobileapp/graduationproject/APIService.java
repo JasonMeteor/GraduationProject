@@ -5,6 +5,6 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 
 public interface APIService {
-    @POST("") //wait for location
+    @POST("/subtract") //API location
     Call<MinusResponse> minusNumbers(@Body MinusRequest request);
 }
