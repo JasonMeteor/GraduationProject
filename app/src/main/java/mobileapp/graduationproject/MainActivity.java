@@ -40,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
                     intent.setClass(MainActivity.this, Setting.class);
                 }
                 else if(id == R.id.btn_gotoapitest){
-                    intent.setClass(MainActivity.this, APITestActivity.class);
+                    intent.setClass(MainActivity.this, UploadTestActivity.class);
                 }
                 startActivity(intent);
             }
