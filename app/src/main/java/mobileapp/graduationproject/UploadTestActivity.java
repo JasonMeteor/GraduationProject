@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.OpenableColumns;
 import android.util.Log;
 import android.view.View;
@@ -20,6 +21,7 @@ import androidx.core.view.WindowInsetsCompat;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.OutputStream;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -67,7 +69,12 @@ public class UploadTestActivity extends AppCompatActivity {
                     intent.setType("audio/*"); // 限制音頻類型檔案
                     startActivityForResult(intent, PICK_FILE_REQUEST);
                 } else if(id == R.id.button2){ //download
-                    ;
+                    // 欲下載檔案之名稱
+                    // 以後應該要改成特定格式，像這樣直接用檔名實在有點麻煩
+                    String filename = "Test Voice.wav2030230493767763165_20240824.wav";
+
+                    // 下载文件
+                    downloadFile(filename);
                 } else if(id == R.id.button3){
                     Intent intent = new Intent();
                     intent.setClass(UploadTestActivity.this, MainActivity.class);
@@ -173,5 +180,74 @@ public class UploadTestActivity extends AppCompatActivity {
                 Log.e("Upload error:", t.getMessage());
             }
         });
+    }
+
+    private void downloadFile(String filename) {
+        Call<ResponseBody> call = apiService.fileDownloadTest(filename);
+
+        call.enqueue(new Callback<ResponseBody>() {
+            @Override
+            public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (response.isSuccessful()) {
+                    boolean writtenToDisk = writeResponseBodyToDisk(response.body(), filename);
+                    if (writtenToDisk) {
+                        Toast.makeText(UploadTestActivity.this, "File downloaded successfully", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(UploadTestActivity.this, "Failed to save file", Toast.LENGTH_SHORT).show();
+                    }
+                } else {
+                    Toast.makeText(UploadTestActivity.this, "Failed to download file", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onFailure(Call<ResponseBody> call, Throwable t) {
+                Toast.makeText(UploadTestActivity.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                Log.e("Download error:", t.getMessage());
+            }
+        });
+    }
+
+    private boolean writeResponseBodyToDisk(ResponseBody body, String filename) {
+        try {
+            // 创建文件路径
+            File file = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), filename);
+
+            InputStream inputStream = null;
+            OutputStream outputStream = null;
+
+            try {
+                byte[] fileReader = new byte[4096];
+
+                inputStream = body.byteStream();
+                outputStream = new FileOutputStream(file);
+
+                while (true) {
+                    int read = inputStream.read(fileReader);
+
+                    if (read == -1) {
+                        break;
+                    }
+
+                    outputStream.write(fileReader, 0, read);
+                }
+
+                outputStream.flush();
+                return true;
+            } catch (Exception e) {
+                Log.e("File save error:", e.getMessage());
+                return false;
+            } finally {
+                if (inputStream != null) {
+                    inputStream.close();
+                }
+                if (outputStream != null) {
+                    outputStream.close();
+                }
+            }
+        } catch (Exception e) {
+            Log.e("File write error:", e.getMessage());
+            return false;
+        }
     }
 }
