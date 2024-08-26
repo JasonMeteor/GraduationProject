@@ -39,6 +39,8 @@ public class UploadTestActivity extends AppCompatActivity {
     private Button btnDownload;
     private Button btnBack;
 
+    private String originalFileName;
+
     private static final int PICK_FILE_REQUEST = 1;
 
     @Override
@@ -98,6 +100,7 @@ public class UploadTestActivity extends AppCompatActivity {
 
             // 上传文件
             if (filePath != null) {
+                Log.e("NameTest1", new File(filePath).getName());
                 uploadFile(new File(filePath));
             } else {
                 Toast.makeText(this, "Failed to get file path", Toast.LENGTH_SHORT).show();
@@ -114,9 +117,22 @@ public class UploadTestActivity extends AppCompatActivity {
 
             // 檢查檔案類型
             if (mimeType != null /*&& mimeType.equals("audio/wav")*/) {
-                // 将文件内容写入临时文件，并返回文件路径
-                String fileName = getFileName(uri);
-                File tempFile = File.createTempFile(fileName, null, getCacheDir());
+                originalFileName = getFileName(uri);
+
+                // 分离文件名和扩展名
+                String name = originalFileName;
+                String extension = "";
+
+                int dotIndex = originalFileName.lastIndexOf('.');
+                if (dotIndex != -1) {
+                    name = originalFileName.substring(0, dotIndex);
+                    extension = originalFileName.substring(dotIndex);
+                }
+
+                // 创建临时文件
+                File tempFile = File.createTempFile(name, extension, getCacheDir());
+
+                // 将文件内容复制到临时文件
                 InputStream inputStream = getContentResolver().openInputStream(uri);
                 FileOutputStream outputStream = new FileOutputStream(tempFile);
 
@@ -132,7 +148,7 @@ public class UploadTestActivity extends AppCompatActivity {
 
                 filePath = tempFile.getAbsolutePath();
             } else {
-                Toast.makeText(this, "Invalid file type selected. Please select an wav file.", Toast.LENGTH_SHORT).show();
+                Toast.makeText(this, "Invalid file type selected. Please select a wav file.", Toast.LENGTH_SHORT).show();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -159,8 +175,11 @@ public class UploadTestActivity extends AppCompatActivity {
     }
 
     private void uploadFile(File file) {
+        String oriFileName = originalFileName;
+        Log.e("NameTest2", oriFileName);
+
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-        MultipartBody.Part body = MultipartBody.Part.createFormData("file", file.getName(), requestFile);
+        MultipartBody.Part body = MultipartBody.Part.createFormData("file", oriFileName, requestFile);
 
         Call<ResponseBody> call = apiService.fileUploadTest(body);
 
