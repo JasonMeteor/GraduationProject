@@ -8,7 +8,7 @@ public class RetrofitManager {
     private APIService APIService;
     private RetrofitManager() {
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://140.134.24.83:5000/") //server IP address
+                .baseUrl("http://140.134.24.83:5963/") //server IP address
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         APIService = retrofit.create(APIService.class);

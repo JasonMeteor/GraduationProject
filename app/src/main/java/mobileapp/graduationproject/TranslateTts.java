@@ -1,11 +1,12 @@
 package mobileapp.graduationproject;
 
 public class TranslateTts {
-    private int language_flag;
-    private String text;
 
-    public TranslateTts(int language_flag, String text) {
-        this.language_flag = language_flag;
+    private String text;
+    private int language_flag;
+
+    public TranslateTts(String text, int language_flag) {
         this.text = text;
+        this.language_flag = language_flag;
     }
 }

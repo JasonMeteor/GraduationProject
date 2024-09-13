@@ -1,11 +1,13 @@
 package mobileapp.graduationproject;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.Manifest;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -52,6 +54,8 @@ public class Translation extends AppCompatActivity {
 
     String sttResponse;
 
+    private static final int REQUEST_MICROPHONE_PERMISSION = 200; //權限相關
+
     @Override
     protected void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
@@ -88,13 +92,13 @@ public class Translation extends AppCompatActivity {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    checkMicrophonePermission();
                     // 開始錄音
                     startRecording();
                     tvSttResult.setText("Now Loading...");
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     // 停止錄音
                     stopRecording();
-                    tvSttResult.setText(sttResponse);
                 }
                 return true;
             }
@@ -105,7 +109,7 @@ public class Translation extends AppCompatActivity {
             public void onClick(View v) {
                 String uploadText = tvSttResult.getText().toString();
 
-                TranslateTts translateTts = new TranslateTts(selectedTrans, uploadText);
+                TranslateTts translateTts = new TranslateTts(uploadText, selectedTrans);
                 Call<ResponseBody> call = apiService.tts(translateTts);
                 call.enqueue(new Callback<ResponseBody>() {
                     @Override
@@ -124,12 +128,15 @@ public class Translation extends AppCompatActivity {
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
+                        } else {
+                            Toast.makeText(Translation.this, "Failed to upload text", Toast.LENGTH_SHORT).show();
                         }
                     }
 
                     @Override
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
-
+                        Toast.makeText(Translation.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.e("Upload error:", t.getMessage());
                     }
                 });
             }
@@ -153,19 +160,29 @@ public class Translation extends AppCompatActivity {
     }
 
     //確認錄音權限
-    /*private void requestPermissions() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE},
-                    PERMISSION_CODE);
+    private void checkMicrophonePermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            // 如果沒有錄音權限，請求權限
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.RECORD_AUDIO}, REQUEST_MICROPHONE_PERMISSION);
         }
-    }*/
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_MICROPHONE_PERMISSION) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                ;
+            } else {
+                // 權限被拒絕，提示用戶
+                Toast.makeText(this, "Microphone permission is required to record audio", Toast.LENGTH_SHORT).show();
+            }
+        }
+    }
 
     private void startRecording() {
-        File file = new File(getExternalFilesDir(null), uploadFileName);
-        fileName = file.getAbsolutePath(); //設置錄音檔檔名&儲存路徑
+        File audioFile = new File(getExternalFilesDir(null), uploadFileName);
+        fileName = audioFile.getAbsolutePath(); //設置錄音檔檔名&儲存路徑
 
         mediaRecorder = new MediaRecorder();
         mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
@@ -195,8 +212,8 @@ public class Translation extends AppCompatActivity {
 
     private void uploadFile(File file) {
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
-        MultipartBody.Part body = MultipartBody.Part.createFormData("file", uploadFileName, requestFile);
-        RequestBody language_flag = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(selectedTrans));;
+        MultipartBody.Part body = MultipartBody.Part.createFormData("audio_file", uploadFileName, requestFile);
+        RequestBody language_flag = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(selectedTrans));
 
         Call<ResponseBody> call = apiService.stt(body, language_flag);
 
@@ -206,27 +223,24 @@ public class Translation extends AppCompatActivity {
                 if (response.isSuccessful()) {
                     Toast.makeText(Translation.this, "File uploaded successfully", Toast.LENGTH_SHORT).show();
 
-                    // 解析伺服器回傳的JSON響應
-                    String responseBody;
-                    try {
-                        responseBody = response.body().string();
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    JSONObject jsonObject;
-                    try {
-                        jsonObject = new JSONObject(responseBody);
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
-                    String message;
-                    try {
-                        message = jsonObject.getString("message");
-                    } catch (JSONException e) {
-                        throw new RuntimeException(e);
-                    }
+                    if (response.body() != null) {
+                        // 解析伺服器回傳的JSON響應
+                        String responseBody;
+                        try {
+                            responseBody = response.body().string();
+                            JSONObject jsonObject = new JSONObject(responseBody);
+                            String stt_result = jsonObject.getString("stt_result");
 
-                    sttResponse = message;
+                            // 儲存伺服器回傳的 message
+                            sttResponse = stt_result;
+                            tvSttResult.setText(sttResponse);
+                        } catch (IOException | JSONException e) {
+                            e.printStackTrace();
+                        }
+                    } else {
+                        Toast.makeText(Translation.this, "Empty response", Toast.LENGTH_SHORT).show();
+                        sttResponse = "Empty response";
+                    }
                 } else {
                     Toast.makeText(Translation.this, "Failed to upload file", Toast.LENGTH_SHORT).show();
                 }
@@ -236,6 +250,8 @@ public class Translation extends AppCompatActivity {
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Toast.makeText(Translation.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("Upload error:", t.getMessage());
+                sttResponse = t.getMessage();
+                tvSttResult.setText(sttResponse);
             }
         });
     }

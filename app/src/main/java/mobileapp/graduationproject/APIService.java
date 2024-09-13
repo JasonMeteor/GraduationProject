@@ -25,13 +25,10 @@ public interface APIService {
     @Multipart
     @POST("/api/stt")
     Call<ResponseBody> stt(
-            @Part MultipartBody.Part file,
-            @Part("param") RequestBody language_flag
-    ); //單向翻譯stt
+            @Part MultipartBody.Part audio_file,
+            @Part("language_flag") RequestBody language_flag
+    ); //stt
 
-    @POST("/api/translate")
-    Call<ResponseBody> tts(@Body TranslateTts ttsData); //單向翻譯tts
+    @POST("/api/translate_and_tts")
+    Call<ResponseBody> tts(@Body TranslateTts ttsData); //tts
 }
-
-// "/api/bidirectional_stt" 雙向翻譯stt接口
-// "api/bidirectional_translate" 雙向翻譯tts接口
