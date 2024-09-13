@@ -19,7 +19,7 @@ public class Training1 extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_training1);
 
-        btnBack = findViewById(R.id.btn_back2);
+        btnBack = findViewById(R.id.btn_twotranstomain);
 
         View.OnClickListener backHomeListener = new View.OnClickListener() {
             @Override

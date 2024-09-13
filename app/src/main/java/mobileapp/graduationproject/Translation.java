@@ -64,7 +64,7 @@ public class Translation extends AppCompatActivity {
         apiService = RetrofitManager.getInstance().getAPI();
 
         tvSttResult = findViewById(R.id.tv_sttResult);
-        btnBack = findViewById(R.id.btn_back2);
+        btnBack = findViewById(R.id.btn_twotranstomain);
         btnRecord = findViewById(R.id.btn_record);
         btnPlayTrans = findViewById(R.id.btn_playTrans);
         spnAtoB = findViewById(R.id.spn_AtoB);

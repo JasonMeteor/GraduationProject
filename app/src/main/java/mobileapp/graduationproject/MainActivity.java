@@ -10,7 +10,7 @@ import android.widget.Button;
 public class MainActivity extends AppCompatActivity {
 
     private Button btnTranslate;
-    private Button btnTraining;
+    private Button btnTwoWayTrans;
     private Button btnSetting;
     private Button btnGoToAPITest;
 
@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         btnTranslate = findViewById(R.id.btn_translate);
-        btnTraining = findViewById(R.id.btn_training);
+        btnTwoWayTrans = findViewById(R.id.btn_twowaytrans);
         btnSetting = findViewById(R.id.btn_setting);
         btnGoToAPITest = findViewById(R.id.btn_gotoapitest);
 
@@ -33,8 +33,8 @@ public class MainActivity extends AppCompatActivity {
                 if(id == R.id.btn_translate){
                     intent.setClass(MainActivity.this, Translation.class);
                 }
-                else if(id == R.id.btn_training){
-                    intent.setClass(MainActivity.this, Training1.class);
+                else if(id == R.id.btn_twowaytrans){
+                    intent.setClass(MainActivity.this, TwoWayTranslation.class);
                 }
                 else if (id == R.id.btn_setting){
                     ;intent.setClass(MainActivity.this, Setting.class);
@@ -47,7 +47,7 @@ public class MainActivity extends AppCompatActivity {
         };
 
         btnTranslate.setOnClickListener(switchLayoutListener);
-        btnTraining.setOnClickListener(switchLayoutListener);
+        btnTwoWayTrans.setOnClickListener(switchLayoutListener);
         btnSetting.setOnClickListener(switchLayoutListener);
         btnGoToAPITest.setOnClickListener(switchLayoutListener);
     }
