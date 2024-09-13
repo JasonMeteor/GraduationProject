@@ -36,8 +36,8 @@ public class MainActivity extends AppCompatActivity {
                 else if(id == R.id.btn_training){
                     intent.setClass(MainActivity.this, Training1.class);
                 }
-                else if(id == R.id.btn_setting){
-                    intent.setClass(MainActivity.this, Setting.class);
+                else if (id == R.id.btn_setting){
+                    ;intent.setClass(MainActivity.this, Setting.class);
                 }
                 else if(id == R.id.btn_gotoapitest){
                     intent.setClass(MainActivity.this, UploadTestActivity.class);

@@ -1,24 +1,34 @@
 package mobileapp.graduationproject;
 
-import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+
+import androidx.activity.EdgeToEdge;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 public class Setting extends AppCompatActivity {
 
     private Button btnBack;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState){
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_settinghome);
+        EdgeToEdge.enable(this);
+        setContentView(R.layout.activity_setting);
+        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
+            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
+            return insets;
+        });
 
-        btnBack = findViewById(R.id.btn_back);
+        btnBack = findViewById(R.id.btn_fromSettingToMain);
 
-        View.OnClickListener backHomeListener = new View.OnClickListener() {
+        View.OnClickListener btnListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Intent intent = new Intent();
@@ -27,6 +37,6 @@ public class Setting extends AppCompatActivity {
             }
         };
 
-        btnBack.setOnClickListener(backHomeListener);
+        btnBack.setOnClickListener(btnListener);
     }
 }
