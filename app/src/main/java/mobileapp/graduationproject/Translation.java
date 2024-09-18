@@ -55,6 +55,7 @@ public class Translation extends AppCompatActivity {
     String sttResponse;
 
     private static final int REQUEST_MICROPHONE_PERMISSION = 200; //權限相關
+    private static final int REQUEST_READ_AUDIO_PERMISSION = 201;
 
     @Override
     protected void onCreate(Bundle savedInstanceState){
@@ -93,12 +94,20 @@ public class Translation extends AppCompatActivity {
             public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     checkMicrophonePermission();
-                    // 開始錄音
-                    startRecording();
-                    tvSttResult.setText("Now Loading...");
+                    if (ContextCompat.checkSelfPermission(Translation.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                        ;
+                    } else {
+                        // 開始錄音
+                        startRecording();
+                        tvSttResult.setText("Now Loading...");
+                    }
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
-                    // 停止錄音
-                    stopRecording();
+                    if (ContextCompat.checkSelfPermission(Translation.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+                        ;
+                    } else {
+                        // 停止錄音
+                        stopRecording();
+                    }
                 }
                 return true;
             }
@@ -107,6 +116,8 @@ public class Translation extends AppCompatActivity {
         View.OnClickListener playTransListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                checkReadExternalStoragePermission();
+
                 String uploadText = tvSttResult.getText().toString();
 
                 TranslateTts translateTts = new TranslateTts(uploadText, selectedTrans);
@@ -115,12 +126,14 @@ public class Translation extends AppCompatActivity {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                         if (response.isSuccessful()) {
-                            // 保存接收到的音頻檔案到本地
+                            // 保存接收到的音檔
                             try {
-                                File audioFile = new File(getExternalFilesDir(null), "tts_output.mp3");
+                                File audioFile = new File(getExternalFilesDir(null), "tts_output.wav");
                                 FileOutputStream fos = new FileOutputStream(audioFile);
                                 fos.write(response.body().bytes());
                                 fos.close();
+
+                                Toast.makeText(Translation.this, "Get audio successfully", Toast.LENGTH_SHORT).show();
 
                                 // 播放音頻文件
                                 playAudio(audioFile.getAbsolutePath());
@@ -129,7 +142,20 @@ public class Translation extends AppCompatActivity {
                                 e.printStackTrace();
                             }
                         } else {
-                            Toast.makeText(Translation.this, "Failed to upload text", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(Translation.this, "Failed to get audio", Toast.LENGTH_SHORT).show();
+                            try {
+                                if (response.errorBody() != null) {
+                                    String errorResponse = response.errorBody().string();
+                                    JSONObject errorJson = new JSONObject(errorResponse);
+                                    String errorMessage = errorJson.optString("error", "Unknown error");
+
+                                    Log.e("API ERROR", errorMessage);
+                                } else {
+                                    Log.e("API ERROR", "Unknown error");
+                                }
+                            } catch (IOException | JSONException e) {
+                                e.printStackTrace();
+                            }
                         }
                     }
 
@@ -167,16 +193,38 @@ public class Translation extends AppCompatActivity {
         }
     }
 
+    //確認存取權限
+    private void checkReadExternalStoragePermission() {
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_MEDIA_AUDIO}, REQUEST_READ_AUDIO_PERMISSION);
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == REQUEST_MICROPHONE_PERMISSION) {
-            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                ;
-            } else {
-                // 權限被拒絕，提示用戶
-                Toast.makeText(this, "Microphone permission is required to record audio", Toast.LENGTH_SHORT).show();
-            }
+
+        switch (requestCode) {
+            case REQUEST_MICROPHONE_PERMISSION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ;
+                } else {
+                    // 權限被拒絕，提示使用者
+                    Toast.makeText(this, "請開啟麥克風權限以開始錄音", Toast.LENGTH_SHORT).show();
+                }
+                break;
+
+            case REQUEST_READ_AUDIO_PERMISSION:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    ;
+                } else {
+                    // 權限被拒絕，提示使用者
+                    Toast.makeText(this, "請開啟讀取音檔權限以播放音檔", Toast.LENGTH_SHORT).show();
+                }
+                break;
+
+            default:
+                break;
         }
     }
 
@@ -210,6 +258,7 @@ public class Translation extends AppCompatActivity {
         uploadFile(audioFile);
     }
 
+    //stt上傳音檔
     private void uploadFile(File file) {
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
         MultipartBody.Part body = MultipartBody.Part.createFormData("audio_file", uploadFileName, requestFile);
@@ -243,6 +292,19 @@ public class Translation extends AppCompatActivity {
                     }
                 } else {
                     Toast.makeText(Translation.this, "Failed to upload file", Toast.LENGTH_SHORT).show();
+                    try {
+                        if (response.errorBody() != null) {
+                            String errorResponse = response.errorBody().string();
+                            JSONObject errorJson = new JSONObject(errorResponse);
+                            String errorMessage = errorJson.optString("error", "Unknown error");
+
+                            Log.e("API ERROR", errorMessage);
+                        } else {
+                            Log.e("API ERROR", "Unknown error");
+                        }
+                    } catch (IOException | JSONException e) {
+                        e.printStackTrace();
+                    }
                 }
             }
 
@@ -256,7 +318,7 @@ public class Translation extends AppCompatActivity {
         });
     }
 
-    //播放音檔
+    //tts播放音檔
     private void playAudio(String audioPath) {
         MediaPlayer mediaPlayer = new MediaPlayer();
         try {
@@ -265,6 +327,7 @@ public class Translation extends AppCompatActivity {
             mediaPlayer.start();
         } catch (IOException e) {
             e.printStackTrace();
+            Toast.makeText(this, "Failed to play audio: " + e.getMessage(), Toast.LENGTH_SHORT).show();
         }
     }
 }
