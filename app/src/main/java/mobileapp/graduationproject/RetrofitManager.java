@@ -19,7 +19,7 @@ public class RetrofitManager {
                 .build();
 
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://140.134.24.83:5963/") //server IP address
+                .baseUrl("http://140.134.24.83:5768/") //server IP address
                 .client(okHttpClient)
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();

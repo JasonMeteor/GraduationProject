@@ -17,8 +17,8 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import org.json.JSONException;
@@ -38,23 +38,25 @@ import retrofit2.Response;
 
 public class Translation extends AppCompatActivity {
 
-    private TextView tvSttResult;
+    private EditText etSttResult;
     private Button btnBack;
     private Button btnRecord, btnPlayTrans;
     private Spinner spnAtoB;
 
-    String[] translateLanguage = new String[] {"中譯英"}; //下拉式選單的內容
+    String[] translateLanguage = new String[] {"中譯英", "英譯中"}; // 下拉式選單的內容
 
     private MediaRecorder mediaRecorder;
-    private String fileName; //這個包含了錄音檔的儲存路徑
-    private String uploadFileName = "recorded_audio.wav"; //這個是上傳時的檔名
-    private int selectedTrans = 0; //選擇的翻譯方式，0 = 中譯英
+    private String fileName; // 這個包含了錄音檔的儲存路徑
+    private String uploadFileName = "recorded_audio.wav"; // 這個是上傳時的檔名
+    private int selectedTrans; // 選擇的翻譯方式，1 = 翻成英文  2 = 翻成中文
 
     APIService apiService;
 
     String sttResponse;
+    String fileFlag; // stt回傳的檔案特徵
 
-    private static final int REQUEST_MICROPHONE_PERMISSION = 200; //權限相關
+    // 權限相關
+    private static final int REQUEST_MICROPHONE_PERMISSION = 200;
     private static final int REQUEST_READ_AUDIO_PERMISSION = 201;
 
     @Override
@@ -64,22 +66,23 @@ public class Translation extends AppCompatActivity {
 
         apiService = RetrofitManager.getInstance().getAPI();
 
-        tvSttResult = findViewById(R.id.tv_sttResult);
+        etSttResult = findViewById(R.id.et_result);
         btnBack = findViewById(R.id.btn_twotranstomain);
         btnRecord = findViewById(R.id.btn_record);
         btnPlayTrans = findViewById(R.id.btn_playTrans);
         spnAtoB = findViewById(R.id.spn_AtoB);
 
-        //下拉式選單設定
+        // 下拉式選單設定
         ArrayAdapter<String> adapterLanguage = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, translateLanguage);
         adapterLanguage.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spnAtoB.setAdapter(adapterLanguage);
 
-        //下拉式選單監聽
+        // 下拉式選單監聽
         AdapterView.OnItemSelectedListener spnListener = new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedTrans = (int)id;
+                selectedTrans = (int)id + 1;
+                Toast.makeText(Translation.this, "FLAG = " + selectedTrans, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -88,7 +91,7 @@ public class Translation extends AppCompatActivity {
             }
         };
 
-        //按住錄音
+        // 按住錄音
         View.OnTouchListener recordListener = new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
@@ -99,7 +102,7 @@ public class Translation extends AppCompatActivity {
                     } else {
                         // 開始錄音
                         startRecording();
-                        tvSttResult.setText("Now Loading...");
+                        etSttResult.setText("Now Loading...");
                     }
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     if (ContextCompat.checkSelfPermission(Translation.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -116,32 +119,54 @@ public class Translation extends AppCompatActivity {
         View.OnClickListener playTransListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkReadExternalStoragePermission();
+                checkReadExternalStoragePermission(); // 檢查權限
 
-                String uploadText = tvSttResult.getText().toString();
+                String uploadText = etSttResult.getText().toString();
 
-                TranslateTts translateTts = new TranslateTts(uploadText, selectedTrans);
-                Call<ResponseBody> call = apiService.tts(translateTts);
+                TranslateTts translateTts = new TranslateTts(uploadText, selectedTrans, fileFlag); // 打包成JSON
+                Call<ResponseBody> call = apiService.tts(translateTts); // 呼叫對應接口
                 call.enqueue(new Callback<ResponseBody>() {
                     @Override
                     public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                        // 正常回應
                         if (response.isSuccessful()) {
-                            // 保存接收到的音檔
-                            try {
-                                File audioFile = new File(getExternalFilesDir(null), "tts_output.wav");
-                                FileOutputStream fos = new FileOutputStream(audioFile);
-                                fos.write(response.body().bytes());
-                                fos.close();
+                            if (response.body() != null){
+                                byte[] audioData = null;
+                                try {
+                                    audioData = response.body().bytes();
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                Log.d("Audio Data Length", "Length: " + audioData.length);
+                                try {
+                                    // byte[] audioData = response.body().bytes();
+                                    // Log.d("Audio Data Length", "Length: " + audioData.length);
 
-                                Toast.makeText(Translation.this, "Get audio successfully", Toast.LENGTH_SHORT).show();
+                                    if (audioData.length > 0){
+                                        File audioFile = new File(getExternalFilesDir(null), "tts_output.wav");
+                                        FileOutputStream fos = new FileOutputStream(audioFile);
+                                        fos.write(audioData);
+                                        fos.close();
 
-                                // 播放音頻文件
-                                playAudio(audioFile.getAbsolutePath());
+                                        //Toast.makeText(Translation.this, "Get audio successfully", Toast.LENGTH_SHORT).show();
 
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                                        // 播放音頻文件
+                                        playAudio(audioFile.getAbsolutePath());
+                                    } else {
+                                        Log.e("Audio Error", "Received empty audio data");
+                                        Toast.makeText(Translation.this, "Received empty audio data", Toast.LENGTH_SHORT).show();
+                                    }
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    Log.e("File Save Error", "Error saving the audio file: " + e.getMessage());
+                                }
+                            } else {
+                                Log.e("API ERROR", "Response body is null");
                             }
-                        } else {
+                        }
+                        // 回應錯誤
+                        else {
                             Toast.makeText(Translation.this, "Failed to get audio", Toast.LENGTH_SHORT).show();
                             try {
                                 if (response.errorBody() != null) {
@@ -159,6 +184,7 @@ public class Translation extends AppCompatActivity {
                         }
                     }
 
+                    // 請求失敗
                     @Override
                     public void onFailure(Call<ResponseBody> call, Throwable t) {
                         Toast.makeText(Translation.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
@@ -168,7 +194,7 @@ public class Translation extends AppCompatActivity {
             }
         };
 
-        //回首頁
+        // 回首頁
         View.OnClickListener backHomeListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -182,7 +208,7 @@ public class Translation extends AppCompatActivity {
         btnRecord.setOnTouchListener(recordListener);
         btnPlayTrans.setOnClickListener(playTransListener);
         spnAtoB.setOnItemSelectedListener(spnListener);
-        spnAtoB.setSelection(0); //預設選擇第一項(中譯英)
+        spnAtoB.setSelection(0); //預設選擇
     }
 
     //確認錄音權限
@@ -270,7 +296,7 @@ public class Translation extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(Translation.this, "File uploaded successfully", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(Translation.this, "File uploaded successfully", Toast.LENGTH_SHORT).show();
 
                     if (response.body() != null) {
                         // 解析伺服器回傳的JSON響應
@@ -279,19 +305,24 @@ public class Translation extends AppCompatActivity {
                             responseBody = response.body().string();
                             JSONObject jsonObject = new JSONObject(responseBody);
                             String stt_result = jsonObject.getString("stt_result");
+                            fileFlag = jsonObject.getString("flag");
+                            Log.d("FLAG CHECK", fileFlag);
 
                             // 儲存伺服器回傳的 message
                             sttResponse = stt_result;
-                            tvSttResult.setText(sttResponse);
+                            etSttResult.setText(sttResponse);
                         } catch (IOException | JSONException e) {
                             e.printStackTrace();
                         }
                     } else {
-                        Toast.makeText(Translation.this, "Empty response", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(Translation.this, "Empty response", Toast.LENGTH_SHORT).show();
                         sttResponse = "Empty response";
+                        etSttResult.setText(sttResponse);
                     }
                 } else {
-                    Toast.makeText(Translation.this, "Failed to upload file", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(Translation.this, "Failed to upload file", Toast.LENGTH_SHORT).show();
+                    sttResponse = "Failed to upload file";
+                    etSttResult.setText(sttResponse);
                     try {
                         if (response.errorBody() != null) {
                             String errorResponse = response.errorBody().string();
@@ -313,7 +344,7 @@ public class Translation extends AppCompatActivity {
                 Toast.makeText(Translation.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("Upload error:", t.getMessage());
                 sttResponse = t.getMessage();
-                tvSttResult.setText(sttResponse);
+                etSttResult.setText(sttResponse);
             }
         });
     }
