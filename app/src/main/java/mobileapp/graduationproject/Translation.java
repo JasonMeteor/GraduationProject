@@ -308,6 +308,10 @@ public class Translation extends AppCompatActivity {
 
                             // 儲存伺服器回傳的 message
                             sttResponse = stt_result;
+                            // 處理英文句號
+                            if (selectedTrans == 2) {
+                                sttResponse = sttResponse.substring(0, sttResponse.length()-1);
+                            }
                             etSttResult.setText(sttResponse);
                         } catch (IOException | JSONException e) {
                             e.printStackTrace();

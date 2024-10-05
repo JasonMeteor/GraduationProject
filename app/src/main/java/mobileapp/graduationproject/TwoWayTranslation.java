@@ -335,7 +335,7 @@ public class TwoWayTranslation extends AppCompatActivity {
             @Override
             public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
                 if (response.isSuccessful()) {
-                    Toast.makeText(TwoWayTranslation.this, "File uploaded successfully", Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(TwoWayTranslation.this, "File uploaded successfully", Toast.LENGTH_SHORT).show();
 
                     if (response.body() != null) {
                         // 解析伺服器回傳的JSON響應
@@ -349,6 +349,10 @@ public class TwoWayTranslation extends AppCompatActivity {
 
                             // 儲存伺服器回傳的 message
                             sttResponse = stt_result;
+                            // 處理英文句號
+                            if (selectedTransA == 2 || selectedTransB == 2) {
+                                sttResponse = sttResponse.substring(0, sttResponse.length()-1);
+                            }
                             etSttResult.setText(sttResponse);
                         } catch (IOException | JSONException e) {
                             e.printStackTrace();
