@@ -48,7 +48,7 @@ public class Translation extends AppCompatActivity {
     private MediaRecorder mediaRecorder;
     private String fileName; // 這個包含了錄音檔的儲存路徑
     private String uploadFileName = "recorded_audio.wav"; // 這個是上傳時的檔名
-    private int selectedTrans; // 選擇的翻譯方式，1 = 翻成英文  2 = 翻成中文
+    private int selectedTrans; // 選擇的翻譯方式，1 = 中譯英  2 = 英譯中
 
     APIService apiService;
 
@@ -116,6 +116,7 @@ public class Translation extends AppCompatActivity {
             }
         };
 
+        // 播放tts
         View.OnClickListener playTransListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -140,9 +141,6 @@ public class Translation extends AppCompatActivity {
                                 }
                                 Log.d("Audio Data Length", "Length: " + audioData.length);
                                 try {
-                                    // byte[] audioData = response.body().bytes();
-                                    // Log.d("Audio Data Length", "Length: " + audioData.length);
-
                                     if (audioData.length > 0){
                                         File audioFile = new File(getExternalFilesDir(null), "tts_output.wav");
                                         FileOutputStream fos = new FileOutputStream(audioFile);

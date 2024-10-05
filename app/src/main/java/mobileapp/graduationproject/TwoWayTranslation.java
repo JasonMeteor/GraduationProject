@@ -7,6 +7,7 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -29,6 +30,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 
 import okhttp3.MediaType;
@@ -45,17 +47,18 @@ public class TwoWayTranslation extends AppCompatActivity {
     private Button btnBack, btnRecordA, btnRecordB, btnPlayA, btnPlayB;
     private Spinner spnTranslateA, spnTranslateB;
 
-    String[] translateLanguage = new String[] {"中譯英"}; // 下拉式選單的內容
+    String[] translateLanguage = new String[] {"中譯英", "英譯中"}; // 下拉式選單的內容
 
     private MediaRecorder mediaRecorder;
     private String fileName; // 這個包含了錄音檔的儲存路徑
     private String uploadFileName = "recorded_audio.wav"; // 這個是上傳時的檔名
-    private int selectedTransA = 1; // 選擇的翻譯方式，1 = 翻成英文  2 = 翻成中文 上面的spinner
-    private int selectedTransB = 1; // 選擇的翻譯方式，1 = 翻成英文  2 = 翻成中文 下面的spinner
+    private int selectedTransA = 1; // 選擇的翻譯方式，1 = 中譯英  2 = 英譯中 上面的spinner
+    private int selectedTransB = 2; // 選擇的翻譯方式，1 = 中譯英  2 = 英譯中 下面的spinner
 
     APIService apiService;
 
     String sttResponse;
+    String fileFlag; // stt回傳的檔案特徵
 
     // 權限相關
     private static final int REQUEST_MICROPHONE_PERMISSION = 200;
@@ -71,6 +74,8 @@ public class TwoWayTranslation extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        apiService = RetrofitManager.getInstance().getAPI();
 
         etSttResult = findViewById(R.id.et_result_bio);
         btnBack = findViewById(R.id.btn_twotranstomain);
@@ -91,7 +96,7 @@ public class TwoWayTranslation extends AppCompatActivity {
         AdapterView.OnItemSelectedListener spnListenerA = new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedTransA = (int)id;
+                selectedTransA = (int)id + 1;
             }
 
             @Override
@@ -112,6 +117,112 @@ public class TwoWayTranslation extends AppCompatActivity {
             }
         };
 
+        // 按住錄音
+        View.OnTouchListener recordListener = new View.OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+                    checkMicrophonePermission();
+                    if (ContextCompat.checkSelfPermission(TwoWayTranslation.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+                    } else {
+                        startRecording();
+                        etSttResult.setText("Now Loading...");
+                    }
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+                    if (ContextCompat.checkSelfPermission(TwoWayTranslation.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+
+                    } else {
+                        stopRecording(v.getId());
+                    }
+                }
+                return true;
+            }
+        };
+
+        // 播放tts
+        View.OnClickListener playTransListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                checkReadExternalStoragePermission(); // 檢查權限
+
+                String uploadText = etSttResult.getText().toString();
+
+                TranslateTts translateTts = new TranslateTts(uploadText, 0, fileFlag); // 打包成JSON
+                int btnID = v.getId();
+                if (btnID == R.id.btn_playTrans_bio_A) {
+                    translateTts.setLanguage_flag(selectedTransA);
+                } else if (btnID == R.id.btn_playTrans_bio_B) {
+                    translateTts.setLanguage_flag(selectedTransB);
+                }
+
+                Call<ResponseBody> call = apiService.tts(translateTts); // 呼叫對應接口
+                call.enqueue(new Callback<ResponseBody>() {
+                    @Override
+                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                        // 正常回應
+                        if (response.isSuccessful()) {
+                            if (response.body() != null){
+                                byte[] audioData = null;
+                                try {
+                                    audioData = response.body().bytes();
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                Log.d("Audio Data Length", "Length: " + audioData.length);
+                                try {
+                                    if (audioData.length > 0){
+                                        File audioFile = new File(getExternalFilesDir(null), "tts_output.wav");
+                                        FileOutputStream fos = new FileOutputStream(audioFile);
+                                        fos.write(audioData);
+                                        fos.close();
+
+                                        Toast.makeText(TwoWayTranslation.this, "Get audio successfully", Toast.LENGTH_SHORT).show();
+
+                                        // 播放音頻文件
+                                        playAudio(audioFile.getAbsolutePath());
+                                    } else {
+                                        Log.e("Audio Error", "Received empty audio data");
+                                        Toast.makeText(TwoWayTranslation.this, "Received empty audio data", Toast.LENGTH_SHORT).show();
+                                    }
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                    Log.e("File Save Error", "Error saving the audio file: " + e.getMessage());
+                                }
+                            } else {
+                                Log.e("API ERROR", "Response body is null");
+                            }
+                        }
+                        // 回應錯誤
+                        else {
+                            Toast.makeText(TwoWayTranslation.this, "Failed to get audio", Toast.LENGTH_SHORT).show();
+                            try {
+                                if (response.errorBody() != null) {
+                                    String errorResponse = response.errorBody().string();
+                                    JSONObject errorJson = new JSONObject(errorResponse);
+                                    String errorMessage = errorJson.optString("error", "Unknown error");
+
+                                    Log.e("API ERROR", errorMessage);
+                                } else {
+                                    Log.e("API ERROR", "Unknown error");
+                                }
+                            } catch (IOException | JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    }
+
+                    // 請求失敗
+                    @Override
+                    public void onFailure(Call<ResponseBody> call, Throwable t) {
+                        Toast.makeText(TwoWayTranslation.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                        Log.e("Upload error:", t.getMessage());
+                    }
+                });
+            }
+        };
+
         View.OnClickListener backListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,10 +233,14 @@ public class TwoWayTranslation extends AppCompatActivity {
         };
 
         btnBack.setOnClickListener(backListener);
+        btnRecordA.setOnTouchListener(recordListener);
+        btnRecordB.setOnTouchListener(recordListener);
+        btnPlayA.setOnClickListener(playTransListener);
+        btnPlayB.setOnClickListener(playTransListener);
         spnTranslateA.setOnItemSelectedListener(spnListenerA);
         spnTranslateA.setSelection(0); // 預設選擇第一項(中譯英)
         spnTranslateB.setOnItemSelectedListener(spnListenerB);
-        spnTranslateB.setSelection(0); // 預設選擇第一項(中譯英)
+        spnTranslateB.setSelection(1); // 預設選擇第一項(英譯中)
     }
 
     //確認錄音權限
@@ -189,7 +304,7 @@ public class TwoWayTranslation extends AppCompatActivity {
         }
     }
 
-    private void stopRecording() {
+    private void stopRecording(int btnID) {
         mediaRecorder.stop();
         mediaRecorder.release();
         mediaRecorder = null;
@@ -198,14 +313,21 @@ public class TwoWayTranslation extends AppCompatActivity {
         File audioFile = new File(fileName);
 
         // 開始上傳音檔
-        uploadFile(audioFile);
+        uploadFile(audioFile, btnID);
     }
 
     //stt上傳音檔
-    private void uploadFile(File file) {
+    private void uploadFile(File file, int btnID) {
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
         MultipartBody.Part body = MultipartBody.Part.createFormData("audio_file", uploadFileName, requestFile);
-        RequestBody language_flag = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(selectedTransA));
+
+        int sendTransFlag = 0;
+        if (btnID == R.id.btn_record_bio_A) {
+            sendTransFlag = selectedTransA;
+        } else if(btnID == R.id.btn_record_bio_B) {
+            sendTransFlag = selectedTransB;
+        }
+        RequestBody language_flag = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(sendTransFlag));
 
         Call<ResponseBody> call = apiService.stt(body, language_flag);
 
@@ -222,6 +344,8 @@ public class TwoWayTranslation extends AppCompatActivity {
                             responseBody = response.body().string();
                             JSONObject jsonObject = new JSONObject(responseBody);
                             String stt_result = jsonObject.getString("stt_result");
+                            fileFlag = jsonObject.getString("flag");
+                            Log.d("FLAG CHECK", fileFlag);
 
                             // 儲存伺服器回傳的 message
                             sttResponse = stt_result;
@@ -232,9 +356,12 @@ public class TwoWayTranslation extends AppCompatActivity {
                     } else {
                         Toast.makeText(TwoWayTranslation.this, "Empty response", Toast.LENGTH_SHORT).show();
                         sttResponse = "Empty response";
+                        etSttResult.setText(sttResponse);
                     }
                 } else {
                     Toast.makeText(TwoWayTranslation.this, "Failed to upload file", Toast.LENGTH_SHORT).show();
+                    sttResponse = "Failed to upload file";
+                    etSttResult.setText(sttResponse);
                     try {
                         if (response.errorBody() != null) {
                             String errorResponse = response.errorBody().string();
