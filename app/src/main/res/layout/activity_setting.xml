@@ -50,7 +50,7 @@
             android:textSize="20sp" />
 
         <Spinner
-            android:id="@+id/spinner"
+            android:id="@+id/spn_single_trans"
             android:layout_width="match_parent"
             android:layout_height="48dp" />
     </LinearLayout>
@@ -88,7 +88,7 @@
                 android:textSize="20sp" />
 
             <Spinner
-                android:id="@+id/spinner2"
+                android:id="@+id/spn_double_trans_A"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_weight="1" />
@@ -106,7 +106,7 @@
                 android:textSize="20sp" />
 
             <Spinner
-                android:id="@+id/spinner3"
+                android:id="@+id/spn_double_trans_B"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
                 android:layout_weight="1" />
@@ -115,7 +115,7 @@
     </TableLayout>
 
     <Button
-        android:id="@+id/button5"
+        android:id="@+id/btn_save_setting"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="24dp"

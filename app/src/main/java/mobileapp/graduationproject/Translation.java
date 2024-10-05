@@ -82,7 +82,7 @@ public class Translation extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 selectedTrans = (int)id + 1;
-                Toast.makeText(Translation.this, "FLAG = " + selectedTrans, Toast.LENGTH_SHORT).show();
+                //Toast.makeText(Translation.this, "FLAG = " + selectedTrans, Toast.LENGTH_SHORT).show();
             }
 
             @Override
