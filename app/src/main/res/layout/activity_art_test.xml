@@ -11,9 +11,236 @@
         android:id="@+id/btn_rewind"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
         android:text="返回"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btn_next"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="304dp"
+        android:layout_marginTop="664dp"
+        android:text="下一頁"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/demo1"
+        style="@style/CustomButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="92dp"
+        android:fontFamily="sans-serif-light"
+        android:text="雙向翻譯"
+        android:textStyle="bold"
+        app:backgroundTint="@color/blue_solid"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/demo2"
+        style="@style/CustomButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="156dp"
+        android:layout_marginTop="92dp"
+        android:fontFamily="sans-serif-light"
+        android:text="雙向翻譯"
+        android:textStyle="bold"
+        app:backgroundTint="@color/red_solid"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/demo3"
+        style="@style/CustomButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="300dp"
+        android:layout_marginTop="92dp"
+        android:fontFamily="sans-serif-light"
+        android:text="雙向翻譯"
+        android:textStyle="bold"
+        app:backgroundTint="@color/purple_solid"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/demo4"
+        style="@style/CustomButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="162dp"
+        android:fontFamily="sans-serif-light"
+        android:text="雙向翻譯"
+        android:textStyle="bold"
+        app:backgroundTint="@color/green_solid"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/demo5"
+        style="@style/CustomButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="156dp"
+        android:layout_marginTop="162dp"
+        android:fontFamily="sans-serif-light"
+        android:text="雙向翻譯"
+        android:textStyle="bold"
+        app:backgroundTint="@color/tomato_solid"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/demo6"
+        style="@style/CustomButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="300dp"
+        android:layout_marginTop="162dp"
+        android:fontFamily="sans-serif-light"
+        android:text="雙向翻譯"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        app:backgroundTint="@color/lime_solid"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/demo7"
+        style="@style/CustomButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="232dp"
+        android:fontFamily="sans-serif-light"
+        android:text="雙向翻譯"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        app:backgroundTint="@color/tan_solid"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/demo8"
+        style="@style/CustomButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="156dp"
+        android:layout_marginTop="232dp"
+        android:fontFamily="sans-serif-light"
+        android:text="雙向翻譯"
+        android:textStyle="bold"
+        app:backgroundTint="@color/darkred_solid"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/demo9"
+        style="@style/CustomButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="300dp"
+        android:layout_marginTop="232dp"
+        android:fontFamily="sans-serif-light"
+        android:text="雙向翻譯"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        app:backgroundTint="@color/orange_solid"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/demo10"
+        style="@style/CustomButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="302dp"
+        android:fontFamily="sans-serif-light"
+        android:text="雙向翻譯"
+        android:textStyle="bold"
+        android:textColor="@color/black"
+        app:backgroundTint="@color/deepsky_solid"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/demo11"
+        style="@style/CustomButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="156dp"
+        android:layout_marginTop="302dp"
+        android:fontFamily="sans-serif-light"
+        android:text="雙向翻譯"
+        android:textStyle="bold"
+        app:backgroundTint="@color/darkGreen_solid"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/demo12"
+        style="@style/CustomButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="300dp"
+        android:layout_marginTop="302dp"
+        android:fontFamily="sans-serif-light"
+        android:text="雙向翻譯"
+        android:textStyle="bold"
+        app:backgroundTint="@color/indigo_solid"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/demo13"
+        style="@style/CustomButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="372dp"
+        android:fontFamily="sans-serif-light"
+        android:text="雙向翻譯"
+        android:textStyle="bold"
+        app:backgroundTint="@color/orchid_solid"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/demo14"
+        style="@style/CustomButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="156dp"
+        android:layout_marginTop="372dp"
+        android:fontFamily="sans-serif-light"
+        android:text="雙向翻譯"
+        android:textStyle="bold"
+        app:backgroundTint="@color/crimson_solid"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/demo15"
+        style="@style/CustomButtonStyle1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="300dp"
+        android:layout_marginTop="372dp"
+        android:fontFamily="sans-serif-light"
+        android:text="雙向翻譯"
+        android:textStyle="bold"
+        android:textColor="@color/gray"
+        app:backgroundTint="@color/bisque_solid"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

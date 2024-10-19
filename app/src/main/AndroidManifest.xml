@@ -19,6 +19,15 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <activity
+            android:name=".ArtTest4"
+            android:exported="false" />
+        <activity
+            android:name=".ArtTest3"
+            android:exported="false" />
+        <activity
+            android:name=".ArtTest2"
+            android:exported="false" />
+        <activity
             android:name=".ArtTest"
             android:exported="false" />
         <activity

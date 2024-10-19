@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">Graduation Project</string>
+
+    <string-array name="gender_options">
+        <item>Male</item>
+        <item>Female</item>
+        <item>Animal</item>
+    </string-array>
 </resources>

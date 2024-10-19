@@ -36,7 +36,6 @@ android {
 }
 
 dependencies {
-
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.appcompat:appcompat:1.6.1")
     implementation("com.google.android.material:material:1.11.0")
@@ -47,4 +46,5 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
     implementation ("com.squareup.retrofit2:retrofit:2.1.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.1.0")
+    implementation ("com.airbnb.android:lottie:6.0.0")
 }
