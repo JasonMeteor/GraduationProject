@@ -1,6 +1,8 @@
 package mobileapp.graduationproject;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.media.MediaPlayer;
@@ -14,7 +16,6 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
@@ -45,15 +46,16 @@ public class TwoWayTranslation extends AppCompatActivity {
 
     private EditText etSttResult;
     private Button btnBack, btnRecordA, btnRecordB, btnPlayA, btnPlayB;
-    private Spinner spnTranslateA, spnTranslateB;
+    private Spinner spnFromA, spnToA, spnFromB, spnToB;
 
-    String[] translateLanguage = new String[] {"中譯英", "英譯中"}; // 下拉式選單的內容
+    String[] translateFrom = new String[] {"中文", "英文", "日文", "粵語", "馬來文"};
+    String[] translateTo = new String[] {"轉中文", "轉英文", "轉日文", "轉粵語", "轉馬來文"}; // 下拉式選單的內容
 
     private MediaRecorder mediaRecorder;
     private String fileName; // 這個包含了錄音檔的儲存路徑
     private String uploadFileName = "recorded_audio.wav"; // 這個是上傳時的檔名
-    private int selectedTransA = 1; // 選擇的翻譯方式，1 = 中譯英  2 = 英譯中 上面的spinner
-    private int selectedTransB = 2; // 選擇的翻譯方式，1 = 中譯英  2 = 英譯中 下面的spinner
+    private int fromLanguageA = 1, toLanguageA = 2;
+    private int fromLanguageB = 1, toLanguageB = 2;
 
     APIService apiService;
 
@@ -83,20 +85,26 @@ public class TwoWayTranslation extends AppCompatActivity {
         btnPlayA = findViewById(R.id.btn_playTrans_bio_A);
         btnRecordB = findViewById(R.id.btn_record_bio_B);
         btnPlayB = findViewById(R.id.btn_playTrans_bio_B);
-        spnTranslateA = findViewById(R.id.spn_transSelectA);
-        spnTranslateB = findViewById(R.id.spn_transSelectB);
+        spnFromA = findViewById(R.id.spn_from_language_A);
+        spnToA = findViewById(R.id.spn_to_language_A);
+        spnFromB = findViewById(R.id.spn_from_language_B);
+        spnToB = findViewById(R.id.spn_to_language_B);
 
         // 下拉式選單設定
-        ArrayAdapter<String> adapterLanguage = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, translateLanguage);
-        adapterLanguage.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spnTranslateA.setAdapter(adapterLanguage);
-        spnTranslateB.setAdapter(adapterLanguage);
+        ArrayAdapter<String> adapterFromLanguage = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, translateFrom);
+        adapterFromLanguage.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spnFromA.setAdapter(adapterFromLanguage);
+        spnFromB.setAdapter(adapterFromLanguage);
+        ArrayAdapter<String> adapterToLanguage = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, translateTo);
+        adapterToLanguage.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spnToA.setAdapter(adapterToLanguage);
+        spnToB.setAdapter(adapterToLanguage);
 
         // 下拉式選單監聽
-        AdapterView.OnItemSelectedListener spnListenerA = new AdapterView.OnItemSelectedListener() {
+        AdapterView.OnItemSelectedListener spnListenerFromA = new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedTransA = (int)id + 1;
+                fromLanguageA = (int)id + 1;
             }
 
             @Override
@@ -105,10 +113,34 @@ public class TwoWayTranslation extends AppCompatActivity {
             }
         };
 
-        AdapterView.OnItemSelectedListener spnListenerB = new AdapterView.OnItemSelectedListener() {
+        AdapterView.OnItemSelectedListener spnListenerToA = new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedTransB = (int)id + 1;
+                toLanguageA = (int)id + 1;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        };
+
+        AdapterView.OnItemSelectedListener spnListenerFromB = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                fromLanguageB = (int)id + 1;
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        };
+
+        AdapterView.OnItemSelectedListener spnListenerToB = new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                toLanguageB = (int)id + 1;
             }
 
             @Override
@@ -144,82 +176,118 @@ public class TwoWayTranslation extends AppCompatActivity {
         View.OnClickListener playTransListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkReadExternalStoragePermission(); // 檢查權限
+                int exit = 1;
+                if (v.getId() == R.id.btn_playTrans_bio_A) {
+                    if (fromLanguageA == toLanguageA) {
+                        new AlertDialog.Builder(TwoWayTranslation.this)
+                                .setTitle("錯誤")
+                                .setMessage("請勿選擇翻譯成同一語言")
+                                .setNeutralButton("好", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
 
-                String uploadText = etSttResult.getText().toString();
+                                    }
+                                })
+                                .show();
+                    } else {
+                        exit = 0;
+                    }
+                } else if (v.getId() == R.id.btn_playTrans_bio_B) {
+                    if (fromLanguageB == toLanguageB) {
+                        new AlertDialog.Builder(TwoWayTranslation.this)
+                                .setTitle("錯誤")
+                                .setMessage("請勿選擇翻譯成同一語言")
+                                .setNeutralButton("好", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
 
-                TranslateTts translateTts = new TranslateTts(uploadText, 0, fileFlag); // 打包成JSON
-                int btnID = v.getId();
-                if (btnID == R.id.btn_playTrans_bio_A) {
-                    translateTts.setLanguage_flag(selectedTransA);
-                } else if (btnID == R.id.btn_playTrans_bio_B) {
-                    translateTts.setLanguage_flag(selectedTransB);
+                                    }
+                                })
+                                .show();
+                    } else {
+                        exit = 0;
+                    }
                 }
 
-                Call<ResponseBody> call = apiService.tts(translateTts); // 呼叫對應接口
-                call.enqueue(new Callback<ResponseBody>() {
-                    @Override
-                    public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+                if (exit == 0){
+                    checkReadExternalStoragePermission(); // 檢查權限
 
-                        // 正常回應
-                        if (response.isSuccessful()) {
-                            if (response.body() != null){
-                                byte[] audioData = null;
-                                try {
-                                    audioData = response.body().bytes();
-                                } catch (IOException e) {
-                                    throw new RuntimeException(e);
-                                }
-                                Log.d("Audio Data Length", "Length: " + audioData.length);
-                                try {
-                                    if (audioData.length > 0){
-                                        File audioFile = new File(getExternalFilesDir(null), "tts_output.wav");
-                                        FileOutputStream fos = new FileOutputStream(audioFile);
-                                        fos.write(audioData);
-                                        fos.close();
+                    String uploadText = etSttResult.getText().toString();
 
-                                        Toast.makeText(TwoWayTranslation.this, "Get audio successfully", Toast.LENGTH_SHORT).show();
+                    TranslateTts translateTts = new TranslateTts(uploadText, 0, 0, fileFlag); // 打包成JSON
+                    int btnID = v.getId();
+                    if (btnID == R.id.btn_playTrans_bio_A) {
+                        translateTts.setLanguage_flag(fromLanguageA, toLanguageA);
+                    } else if (btnID == R.id.btn_playTrans_bio_B) {
+                        translateTts.setLanguage_flag(fromLanguageB, toLanguageB);
+                    }
 
-                                        // 播放音頻文件
-                                        playAudio(audioFile.getAbsolutePath());
-                                    } else {
-                                        Log.e("Audio Error", "Received empty audio data");
-                                        Toast.makeText(TwoWayTranslation.this, "Received empty audio data", Toast.LENGTH_SHORT).show();
+                    Call<ResponseBody> call = apiService.tts(translateTts); // 呼叫對應接口
+                    call.enqueue(new Callback<ResponseBody>() {
+                        @Override
+                        public void onResponse(Call<ResponseBody> call, Response<ResponseBody> response) {
+
+                            // 正常回應
+                            if (response.isSuccessful()) {
+                                if (response.body() != null){
+                                    byte[] audioData = null;
+                                    try {
+                                        audioData = response.body().bytes();
+                                    } catch (IOException e) {
+                                        throw new RuntimeException(e);
                                     }
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                    Log.e("File Save Error", "Error saving the audio file: " + e.getMessage());
-                                }
-                            } else {
-                                Log.e("API ERROR", "Response body is null");
-                            }
-                        }
-                        // 回應錯誤
-                        else {
-                            Toast.makeText(TwoWayTranslation.this, "Failed to get audio", Toast.LENGTH_SHORT).show();
-                            try {
-                                if (response.errorBody() != null) {
-                                    String errorResponse = response.errorBody().string();
-                                    JSONObject errorJson = new JSONObject(errorResponse);
-                                    String errorMessage = errorJson.optString("error", "Unknown error");
+                                    Log.d("Audio Data Length", "Length: " + audioData.length);
+                                    try {
+                                        if (audioData.length > 0){
+                                            File audioFile = new File(getExternalFilesDir(null), "tts_output.wav");
+                                            FileOutputStream fos = new FileOutputStream(audioFile);
+                                            fos.write(audioData);
+                                            fos.close();
 
-                                    Log.e("API ERROR", errorMessage);
+                                            Toast.makeText(TwoWayTranslation.this, "Get audio successfully", Toast.LENGTH_SHORT).show();
+
+                                            // 播放音頻文件
+                                            playAudio(audioFile.getAbsolutePath());
+                                        } else {
+                                            Log.e("Audio Error", "Received empty audio data");
+                                            Toast.makeText(TwoWayTranslation.this, "Received empty audio data", Toast.LENGTH_SHORT).show();
+                                        }
+                                    } catch (IOException e) {
+                                        e.printStackTrace();
+                                        Log.e("File Save Error", "Error saving the audio file: " + e.getMessage());
+                                    }
                                 } else {
-                                    Log.e("API ERROR", "Unknown error");
+                                    Log.e("API ERROR", "Response body is null");
                                 }
-                            } catch (IOException | JSONException e) {
-                                e.printStackTrace();
+                            }
+                            // 回應錯誤
+                            else {
+                                Toast.makeText(TwoWayTranslation.this, "Failed to get audio", Toast.LENGTH_SHORT).show();
+                                try {
+                                    if (response.errorBody() != null) {
+                                        String errorResponse = response.errorBody().string();
+                                        JSONObject errorJson = new JSONObject(errorResponse);
+                                        String errorMessage = errorJson.optString("error", "Unknown error");
+
+                                        Log.e("API ERROR", errorMessage);
+                                    } else {
+                                        Log.e("API ERROR", "Unknown error");
+                                    }
+                                } catch (IOException | JSONException e) {
+                                    e.printStackTrace();
+                                }
                             }
                         }
-                    }
 
-                    // 請求失敗
-                    @Override
-                    public void onFailure(Call<ResponseBody> call, Throwable t) {
-                        Toast.makeText(TwoWayTranslation.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
-                        Log.e("Upload error:", t.getMessage());
-                    }
-                });
+                        // 請求失敗
+                        @Override
+                        public void onFailure(Call<ResponseBody> call, Throwable t) {
+                            Toast.makeText(TwoWayTranslation.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
+                            Log.e("Upload error:", t.getMessage());
+                        }
+                    });
+                }
+
             }
         };
 
@@ -237,10 +305,14 @@ public class TwoWayTranslation extends AppCompatActivity {
         btnRecordB.setOnTouchListener(recordListener);
         btnPlayA.setOnClickListener(playTransListener);
         btnPlayB.setOnClickListener(playTransListener);
-        spnTranslateA.setOnItemSelectedListener(spnListenerA);
-        spnTranslateA.setSelection(0); // 預設選擇第一項(中譯英)
-        spnTranslateB.setOnItemSelectedListener(spnListenerB);
-        spnTranslateB.setSelection(1); // 預設選擇第一項(英譯中)
+        spnFromA.setOnItemSelectedListener(spnListenerFromA);
+        spnFromA.setSelection(0); // 預設選擇
+        spnToA.setOnItemSelectedListener(spnListenerToA);
+        spnToA.setSelection(1);
+        spnFromB.setOnItemSelectedListener(spnListenerFromB);
+        spnFromB.setSelection(1); // 預設選擇
+        spnToB.setOnItemSelectedListener(spnListenerToB);
+        spnToB.setSelection(0);
     }
 
     //確認錄音權限
@@ -323,9 +395,9 @@ public class TwoWayTranslation extends AppCompatActivity {
 
         int sendTransFlag = 0;
         if (btnID == R.id.btn_record_bio_A) {
-            sendTransFlag = selectedTransA;
+            sendTransFlag = fromLanguageA;
         } else if(btnID == R.id.btn_record_bio_B) {
-            sendTransFlag = selectedTransB;
+            sendTransFlag = fromLanguageB;
         }
         RequestBody language_flag = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(sendTransFlag));
 
@@ -350,7 +422,7 @@ public class TwoWayTranslation extends AppCompatActivity {
                             // 儲存伺服器回傳的 message
                             sttResponse = stt_result;
                             // 處理英文句號
-                            if (selectedTransA == 2 || selectedTransB == 2) {
+                            if ((btnID == R.id.btn_record_bio_A && fromLanguageA == 2) || (btnID == R.id.btn_record_bio_B && fromLanguageB == 2)) {
                                 sttResponse = sttResponse.substring(0, sttResponse.length()-1);
                             }
                             etSttResult.setText(sttResponse);

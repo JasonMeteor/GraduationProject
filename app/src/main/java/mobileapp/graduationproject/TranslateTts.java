@@ -3,16 +3,19 @@ package mobileapp.graduationproject;
 public class TranslateTts {
 
     private String text;
-    private int language_flag;
+    private int from_language;
+    private int to_language;
     private String flag; // 伺服器提取特定檔案用的
 
-    public TranslateTts(String text, int language_flag, String file_flag) {
+    public TranslateTts(String text, int from_language, int to_language, String flag) {
         this.text = text;
-        this.language_flag = language_flag;
-        this.flag = file_flag;
+        this.from_language = from_language;
+        this.to_language = to_language;
+        this.flag = flag;
     }
 
-    public void setLanguage_flag(int language_flag) {
-        this.language_flag = language_flag;
+    public void setLanguage_flag(int from_language, int to_language) {
+        this.from_language = from_language;
+        this.to_language = to_language;
     }
 }

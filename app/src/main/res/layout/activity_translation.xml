@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/bg2"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto">
@@ -18,17 +19,6 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Spinner
-        android:id="@+id/spn_AtoB"
-        android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="16dp"
-        app:layout_constraintBottom_toTopOf="@+id/linearLayout4"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent" />
-
     <LinearLayout
         android:id="@+id/linearLayout4"
         android:layout_width="0dp"
@@ -42,17 +32,25 @@
 
         <Button
             android:id="@+id/btn_record"
+            style="@style/CustomButtonStyle1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="開始錄音" />
+            android:fontFamily="sans-serif-light"
+            android:text="開始錄音"
+            android:textStyle="bold"
+            app:backgroundTint="@color/red_solid" />
 
         <Button
             android:id="@+id/btn_playTrans"
+            style="@style/CustomButtonStyle1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="播放翻譯" />
+            android:fontFamily="sans-serif-light"
+            android:text="播放翻譯"
+            android:textStyle="bold"
+            app:backgroundTint="@color/green_solid" />
     </LinearLayout>
 
     <TextView
@@ -72,7 +70,7 @@
         android:layout_marginStart="24dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="24dp"
-        android:background="@android:drawable/editbox_background"
+        android:background="@drawable/textfield"
         android:ems="10"
         android:gravity="start|top"
         android:inputType="textMultiLine"
@@ -92,9 +90,36 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="24dp"
-        android:layout_marginBottom="24dp"
+        android:layout_marginBottom="16dp"
         android:text="請勿同時使用多個語言，可能無法正常翻譯"
-        app:layout_constraintBottom_toTopOf="@+id/spn_AtoB"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout7"
         app:layout_constraintStart_toStartOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout7"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="24dp"
+        android:layout_marginBottom="16dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout4"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Spinner
+            android:id="@+id/spn_fromA"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="@android:drawable/spinner_background" />
+
+        <Spinner
+            android:id="@+id/spn_toB"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_weight="1"
+            android:background="@android:drawable/spinner_background" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

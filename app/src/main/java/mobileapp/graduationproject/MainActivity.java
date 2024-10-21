@@ -13,7 +13,6 @@ public class MainActivity extends AppCompatActivity {
     private Button btnTwoWayTrans;
     private Button btnSetting;
     private Button btnGoToAPITest;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
