@@ -6,7 +6,6 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.Manifest;
@@ -23,12 +22,15 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.airbnb.lottie.LottieAnimationView;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Objects;
 
 import okhttp3.MediaType;
 import okhttp3.MultipartBody;
@@ -44,20 +46,21 @@ public class Translation extends AppCompatActivity {
     private Button btnBack;
     private Button btnRecord, btnPlayTrans;
     private Spinner spnFromA, spnToB;
+    private LottieAnimationView lottieLoading;
 
     String[] translateFrom = new String[] {"中文", "英文", "日文", "粵語", "馬來文"};
-    String[] translateTo = new String[] {"轉中文", "轉英文", "轉日文", "轉粵語", "轉馬來文"}; // 下拉式選單的內容
+    String[] translateTo = new String[] {"轉中文", "轉英文", "轉中文(冠霖)"}; // 下拉式選單的內容 , "轉日文", "轉粵語", "轉馬來文"
 
     private MediaRecorder mediaRecorder;
+    private boolean isRecording = false; // 錄音功能短間隔按壓的嘗試處理
     private String fileName; // 這個包含了錄音檔的儲存路徑
     private String uploadFileName = "recorded_audio.wav"; // 這個是上傳時的檔名
     private int fromLanguage = 1, toLanguage = 2;
-    //private int selectedTrans = 1; // 選擇的翻譯方式，1 = 中譯英  2 = 英譯中
 
     APIService apiService;
 
     String sttResponse;
-    String fileFlag; // stt回傳的檔案特徵
+    String fileFlag = ""; // stt回傳的檔案特徵
 
     // 權限相關
     private static final int REQUEST_MICROPHONE_PERMISSION = 200;
@@ -76,6 +79,8 @@ public class Translation extends AppCompatActivity {
         btnPlayTrans = findViewById(R.id.btn_playTrans);
         spnFromA = findViewById(R.id.spn_fromA);
         spnToB = findViewById(R.id.spn_toB);
+
+        lottieLoading = findViewById(R.id.lottie_loading);
 
         // 下拉式選單設定
         ArrayAdapter<String> adapterFromLanguage = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, translateFrom);
@@ -102,7 +107,6 @@ public class Translation extends AppCompatActivity {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 toLanguage = (int)id + 1;
-                //Toast.makeText(Translation.this, "FLAG = " + selectedTrans, Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -122,7 +126,7 @@ public class Translation extends AppCompatActivity {
                     } else {
                         // 開始錄音
                         startRecording();
-                        etSttResult.setText("Now Loading...");
+                        etSttResult.setText("Listening...");
                     }
                 } else if (event.getAction() == MotionEvent.ACTION_UP) {
                     if (ContextCompat.checkSelfPermission(Translation.this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
@@ -140,19 +144,19 @@ public class Translation extends AppCompatActivity {
         View.OnClickListener playTransListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // 防呆機制
-                if (fromLanguage == toLanguage) {
-                    new AlertDialog.Builder(Translation.this)
-                            .setTitle("錯誤")
-                            .setMessage("請勿選擇翻譯成同一語言")
-                            .setNeutralButton("好", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
+                btnPlayTrans.setEnabled(false);
+                lottieLoading.setVisibility(View.VISIBLE);
 
-                                }
-                            })
-                            .show();
-                    //Toast.makeText(Translation.this, "請勿選擇翻譯成同一語言", Toast.LENGTH_SHORT).show();
+                if (fileFlag.isEmpty()) {
+                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(Translation.this);
+                    alertDialog.setTitle("錯誤");
+                    alertDialog.setMessage("請先進行錄音");
+                    alertDialog.setNeutralButton("好",(dialog, which) -> {
+                        btnPlayTrans.setEnabled(true);
+                        lottieLoading.setVisibility(View.INVISIBLE);
+                    });
+                    alertDialog.setCancelable(false);
+                    alertDialog.show();
                 } else {
                     checkReadExternalStoragePermission(); // 檢查權限
 
@@ -185,21 +189,31 @@ public class Translation extends AppCompatActivity {
 
                                             // 播放音頻文件
                                             playAudio(audioFile.getAbsolutePath());
+                                            lottieLoading.setVisibility(View.INVISIBLE);
                                         } else {
                                             Log.e("Audio Error", "Received empty audio data");
                                             Toast.makeText(Translation.this, "Received empty audio data", Toast.LENGTH_SHORT).show();
+                                            btnPlayTrans.setEnabled(true); // 即使出現ERROR也可以回復按鈕功能
+                                            lottieLoading.setVisibility(View.INVISIBLE);
                                         }
                                     } catch (IOException e) {
                                         e.printStackTrace();
                                         Log.e("File Save Error", "Error saving the audio file: " + e.getMessage());
+                                        btnPlayTrans.setEnabled(true); // 即使出現ERROR也可以回復按鈕功能
+                                        lottieLoading.setVisibility(View.INVISIBLE);
                                     }
                                 } else {
                                     Log.e("API ERROR", "Response body is null");
+                                    btnPlayTrans.setEnabled(true); // 即使出現ERROR也可以回復按鈕功能
+                                    lottieLoading.setVisibility(View.INVISIBLE);
                                 }
                             }
                             // 回應錯誤
                             else {
                                 Toast.makeText(Translation.this, "Failed to get audio", Toast.LENGTH_SHORT).show();
+                                btnPlayTrans.setEnabled(true); // 即使出現ERROR也可以回復按鈕功能
+                                lottieLoading.setVisibility(View.INVISIBLE);
+
                                 try {
                                     if (response.errorBody() != null) {
                                         String errorResponse = response.errorBody().string();
@@ -221,6 +235,8 @@ public class Translation extends AppCompatActivity {
                         public void onFailure(Call<ResponseBody> call, Throwable t) {
                             Toast.makeText(Translation.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                             Log.e("Upload error:", t.getMessage());
+                            btnPlayTrans.setEnabled(true); // 即使出現ERROR也可以回復按鈕功能
+                            lottieLoading.setVisibility(View.INVISIBLE);
                         }
                     });
                 }
@@ -238,8 +254,8 @@ public class Translation extends AppCompatActivity {
         };
 
         btnBack.setOnClickListener(backHomeListener);
-        btnRecord.setOnTouchListener(recordListener); //暫時關閉
-        btnPlayTrans.setOnClickListener(playTransListener); //暫時關閉
+        btnRecord.setOnTouchListener(recordListener);
+        btnPlayTrans.setOnClickListener(playTransListener);
         spnFromA.setOnItemSelectedListener(spnFromListener);
         spnFromA.setSelection(0); //預設選擇
         spnToB.setOnItemSelectedListener(spnToListener);
@@ -290,37 +306,64 @@ public class Translation extends AppCompatActivity {
     }
 
     private void startRecording() {
+        if(isRecording) {
+            return;
+        }
+
         File audioFile = new File(getExternalFilesDir(null), uploadFileName);
         fileName = audioFile.getAbsolutePath(); //設置錄音檔檔名&儲存路徑
 
-        mediaRecorder = new MediaRecorder();
-        mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
-        mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
-        mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
-        mediaRecorder.setOutputFile(fileName);
-
         try {
+            mediaRecorder = new MediaRecorder();
+            mediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
+            mediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.DEFAULT);
+            mediaRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB);
+            mediaRecorder.setOutputFile(fileName);
+
             mediaRecorder.prepare();
             mediaRecorder.start();
+            isRecording = true;
         } catch (IOException e) {
             e.printStackTrace();
+            releaseMediaRecorder();
         }
     }
 
     private void stopRecording() {
-        mediaRecorder.stop();
-        mediaRecorder.release();
-        mediaRecorder = null;
+        if(!isRecording) {
+            return;
+        }
 
-        // 獲取錄音文件的File對象
-        File audioFile = new File(fileName);
+        try {
+            mediaRecorder.stop();
 
-        // 開始上傳音檔
-        uploadFile(audioFile);
+            // 獲取錄音文件的File對象
+            File audioFile = new File(fileName);
+
+            // 開始上傳音檔
+            uploadFile(audioFile);
+        } catch (RuntimeException e) {
+            e.printStackTrace();
+            etSttResult.setText(""); // 淨空文字欄，重新顯示hint
+        } finally {
+            releaseMediaRecorder();
+        }
+    }
+
+    // 釋放錄音器資源
+    private void releaseMediaRecorder() {
+        if (mediaRecorder != null) {
+            mediaRecorder.reset();
+            mediaRecorder.release();
+            mediaRecorder = null;
+            isRecording = false;
+        }
     }
 
     //stt上傳音檔
     private void uploadFile(File file) {
+        lottieLoading.setVisibility(View.VISIBLE);
+
         RequestBody requestFile = RequestBody.create(MediaType.parse("multipart/form-data"), file);
         MultipartBody.Part body = MultipartBody.Part.createFormData("audio_file", uploadFileName, requestFile);
         RequestBody language_flag = RequestBody.create(MediaType.parse("text/plain"), String.valueOf(fromLanguage));
@@ -345,23 +388,28 @@ public class Translation extends AppCompatActivity {
 
                             // 儲存伺服器回傳的 message
                             sttResponse = stt_result;
-                            // 處理英文句號
-                            if (fromLanguage == 2) {
+                            // 處理句號 英 日 馬來
+                            if (fromLanguage == 2 || fromLanguage == 3 || fromLanguage == 5) {
                                 sttResponse = sttResponse.substring(0, sttResponse.length()-1);
                             }
                             etSttResult.setText(sttResponse);
                         } catch (IOException | JSONException e) {
                             e.printStackTrace();
+                        } finally {
+                            lottieLoading.setVisibility(View.INVISIBLE);
                         }
                     } else {
                         //Toast.makeText(Translation.this, "Empty response", Toast.LENGTH_SHORT).show();
                         sttResponse = "Empty response";
                         etSttResult.setText(sttResponse);
+                        lottieLoading.setVisibility(View.INVISIBLE);
                     }
                 } else {
                     //Toast.makeText(Translation.this, "Failed to upload file", Toast.LENGTH_SHORT).show();
                     sttResponse = "Failed to upload file";
                     etSttResult.setText(sttResponse);
+                    lottieLoading.setVisibility(View.INVISIBLE);
+
                     try {
                         if (response.errorBody() != null) {
                             String errorResponse = response.errorBody().string();
@@ -382,8 +430,9 @@ public class Translation extends AppCompatActivity {
             public void onFailure(Call<ResponseBody> call, Throwable t) {
                 Toast.makeText(Translation.this, "Error: " + t.getMessage(), Toast.LENGTH_SHORT).show();
                 Log.e("Upload error:", t.getMessage());
-                sttResponse = t.getMessage();
+                sttResponse = "網路錯誤，無法連接到伺服器";
                 etSttResult.setText(sttResponse);
+                lottieLoading.setVisibility(View.INVISIBLE);
             }
         });
     }
@@ -395,9 +444,17 @@ public class Translation extends AppCompatActivity {
             mediaPlayer.setDataSource(audioPath);
             mediaPlayer.prepare();
             mediaPlayer.start();
+
+            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                @Override
+                public void onCompletion(MediaPlayer mp) {
+                    btnPlayTrans.setEnabled(true);
+                }
+            });
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(this, "Failed to play audio: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            btnPlayTrans.setEnabled(true); // 即使出現ERROR也可以回復按鈕功能
         }
     }
 }

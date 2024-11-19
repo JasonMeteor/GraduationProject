@@ -26,7 +26,7 @@ public interface APIService {
     @POST("/api/stt")
     Call<ResponseBody> stt(
             @Part MultipartBody.Part audio_file,
-            @Part("language_flag") RequestBody language_flag
+            @Part("from_language") RequestBody from_language
     ); //stt
 
     @POST("/api/translate_and_tts")

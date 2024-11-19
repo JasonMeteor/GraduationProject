@@ -119,10 +119,11 @@
         android:background="@drawable/textfield"
         android:ems="10"
         android:gravity="start|top"
+        android:hint="按住錄音鍵開始錄音，時長不超過一分鐘"
         android:inputType="textMultiLine"
+        android:padding="10dp"
         android:scrollHorizontally="false"
         android:singleLine="false"
-        android:text="按住錄音鍵開始錄音，預設語言為中文，時長不超過一分鐘"
         android:textSize="24sp"
         app:layout_constraintBottom_toTopOf="@+id/tv_warning_bio"
         app:layout_constraintEnd_toEndOf="parent"
@@ -193,5 +194,19 @@
             android:layout_weight="1"
             android:background="@android:drawable/spinner_background" />
     </LinearLayout>
+
+    <com.airbnb.lottie.LottieAnimationView
+        android:id="@+id/ani_loading"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
+        android:visibility="invisible"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:lottie_autoPlay="true"
+        app:lottie_loop="true"
+        app:lottie_rawRes="@raw/loading2"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
