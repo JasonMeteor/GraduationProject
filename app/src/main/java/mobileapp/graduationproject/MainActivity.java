@@ -20,8 +20,8 @@ public class MainActivity extends AppCompatActivity {
 
         btnTranslate = findViewById(R.id.btn_translate);
         btnTwoWayTrans = findViewById(R.id.btn_twowaytrans);
-        btnSetting = findViewById(R.id.btn_setting);
-        btnGoToAPITest = findViewById(R.id.btn_gotoapitest);
+//        btnSetting = findViewById(R.id.btn_setting);
+//        btnGoToAPITest = findViewById(R.id.btn_gotoapitest);
 
         View.OnClickListener switchLayoutListener = new View.OnClickListener() {
 
@@ -35,19 +35,19 @@ public class MainActivity extends AppCompatActivity {
                 else if(id == R.id.btn_twowaytrans){
                     intent.setClass(MainActivity.this, TwoWayTranslation.class);
                 }
-                else if (id == R.id.btn_setting){
-                    ;intent.setClass(MainActivity.this, Setting.class);
-                }
-                else if(id == R.id.btn_gotoapitest){
-                    intent.setClass(MainActivity.this, ArtTest.class);
-                }
+//                else if (id == R.id.btn_setting){
+//                    ;intent.setClass(MainActivity.this, Setting.class);
+//                }
+//                else if(id == R.id.btn_gotoapitest){
+//                    intent.setClass(MainActivity.this, ArtTest.class);
+//                }
                 startActivity(intent);
             }
         };
 
         btnTranslate.setOnClickListener(switchLayoutListener);
         btnTwoWayTrans.setOnClickListener(switchLayoutListener);
-        btnSetting.setOnClickListener(switchLayoutListener);
-        btnGoToAPITest.setOnClickListener(switchLayoutListener);
+//        btnSetting.setOnClickListener(switchLayoutListener);
+//        btnGoToAPITest.setOnClickListener(switchLayoutListener);
     }
 }
