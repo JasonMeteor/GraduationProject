@@ -243,4 +243,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/demo16"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        app:cornerRadius="50dp"
+        android:layout_marginStart="300dp"
+        android:layout_marginTop="432dp"
+        android:fontFamily="sans-serif-light"
+        android:text="雙向翻譯"
+        android:textStyle="bold"
+        android:textColor="@color/gray"
+        app:backgroundTint="@color/bisque_solid"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

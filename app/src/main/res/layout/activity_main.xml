@@ -2,7 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@drawable/bg2"
+    android:background="@drawable/bg3"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
@@ -11,9 +11,9 @@
         android:id="@+id/tv_appTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="80dp"
+        android:layout_marginTop="100dp"
         android:text="翻譯蒟蒻"
-        android:textSize="40sp"
+        android:textSize="48sp"
         android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -22,58 +22,95 @@
     <Button
         android:id="@+id/btn_translate"
         style="@style/CustomButtonStyle1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="180dp"
+        android:layout_height="120dp"
         android:layout_marginTop="85dp"
         android:text="翻譯"
         android:textStyle="bold"
-        app:backgroundTint="@color/indigo_solid"
+        android:gravity="center"
+        android:textSize="24sp"
+        android:textColor="@color/trans_4"
+        app:backgroundTint="@color/orange_solid"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tv_appTitle" />
 
-    <LinearLayout
-        android:id="@+id/linearLayout3"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginEnd="24dp"
-        android:orientation="horizontal"
+    <Button
+        android:id="@+id/btn_twowaytrans"
+        style="@style/CustomButtonStyle1"
+        android:layout_width="180dp"
+        android:layout_height="120dp"
+        android:layout_marginTop="240dp"
+        android:text="雙向翻譯"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:textSize="24sp"
+        android:textColor="@color/trans_4"
+        app:backgroundTint="@color/blue_trans"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_translate">
+        app:layout_constraintTop_toBottomOf="@+id/tv_appTitle"/>
 
-        <Button
-            android:id="@+id/btn_setting"
-            style="@style/CustomButtonStyle1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="設定"
-            android:textStyle="bold"
-            app:backgroundTint="@color/indigo_solid" />
 
-        <Button
-            android:id="@+id/btn_twowaytrans"
-            style="@style/CustomButtonStyle1"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="雙向翻譯"
-            android:textStyle="bold"
-            app:backgroundTint="@color/indigo_solid" />
-
-    </LinearLayout>
-
-    <Button
-        android:id="@+id/btn_gotoapitest"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="32dp"
-        android:text="美術素材測試"
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="Example Image"
+        android:src="@drawable/mat1"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.15"
+        app:layout_constraintHorizontal_bias="0.848"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/linearLayout3" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.975"
+        app:layout_constraintWidth_percent="0.15" />
+
+    <ImageView
+        android:id="@+id/imageView5"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="Example Image"
+        android:src="@drawable/mat5"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.16"
+        app:layout_constraintHorizontal_bias="0.081"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.109"
+        app:layout_constraintWidth_percent="0.16" />
+
+    <ImageView
+        android:id="@+id/imageView3"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="Example Image"
+        android:src="@drawable/mat3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.16"
+        app:layout_constraintHorizontal_bias="0.918"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.109"
+        app:layout_constraintWidth_percent="0.16" />
+
+    <ImageView
+        android:id="@+id/imageView4"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:contentDescription="Example Image"
+        android:src="@drawable/mat4"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_percent="0.15"
+        app:layout_constraintHorizontal_bias="0.154"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.975"
+        app:layout_constraintWidth_percent="0.15" />
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -82,6 +119,7 @@
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="24dp"
         android:orientation="vertical"
+        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent">
@@ -90,19 +128,25 @@
             android:id="@+id/textView2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="翻譯蒟蒻" />
+            android:gravity="center"
+            android:textSize="16sp"
+            android:text="逢甲大學113學年度" />
 
         <TextView
             android:id="@+id/textView3"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="逢甲大學113學年度資工系畢業專題" />
+            android:gravity="center"
+            android:textSize="16sp"
+            android:text="資訊工程系畢業專題" />
 
         <TextView
             android:id="@+id/textView4"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Version 0.1" />
+            android:gravity="center"
+            android:textSize="16sp"
+            android:text="Version 1.0" />
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
