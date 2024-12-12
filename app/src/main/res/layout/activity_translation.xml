@@ -73,7 +73,7 @@
         android:background="@drawable/textfield"
         android:ems="10"
         android:gravity="start|top"
-        android:hint="按住錄音鍵開始錄音，時長不超過一分鐘"
+        android:hint="按住錄音鍵開始錄音，時長不超過10秒"
         android:inputType="textMultiLine"
         android:padding="10dp"
         android:scrollHorizontally="false"

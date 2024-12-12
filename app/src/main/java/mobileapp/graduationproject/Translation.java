@@ -49,7 +49,7 @@ public class Translation extends AppCompatActivity {
     private LottieAnimationView lottieLoading;
 
     String[] translateFrom = new String[] {"中文", "英文", "日文", "粵語", "馬來文"};
-    String[] translateTo = new String[] {"轉中文", "轉英文", "轉中文(冠霖)"}; // 下拉式選單的內容 , "轉日文", "轉粵語", "轉馬來文"
+    String[] translateTo = new String[] {"轉中文", "轉英文", "轉中文(冠霖)", "轉中文(Wing)"}; // 下拉式選單的內容 , "轉日文", "轉粵語", "轉馬來文"
 
     private MediaRecorder mediaRecorder;
     private boolean isRecording = false; // 錄音功能短間隔按壓的嘗試處理
